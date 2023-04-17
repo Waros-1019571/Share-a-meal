@@ -1,0 +1,22 @@
+{
+  "name": "share-a-meal",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WonderOfYou/Share-a-meal.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/WonderOfYou/Share-a-meal/issues"
+  },
+  "homepage": "https://github.com/WonderOfYou/Share-a-meal#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
