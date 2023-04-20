@@ -1,8 +1,8 @@
-const express = require('express');
-const assert = require('assert');
+const express = require('express')
+const assert = require('assert')
 
-const app = express();
-const port = 1337;
+const app = express()
+const port = 1337
 
 let database = {
     users: [
@@ -21,49 +21,51 @@ let database = {
         password: 'MaarC#isdebeste'
       }
     ],
-};
+}
 
-let index = database.users.length;
+let index = database.users.length
 
-app.use(express.json());
+app.use(express.json())
 
 //201
 app.post('/api/user', (req, res) => {
-    const user = req.body;
+    const user = req.body
     try {
         for (let i = 0; i < database.users.length; i++) {
             assert(typeof user.emailAdress === 'string', 'Het e-mailadres moet een string zijn')
             assert(user.emailAdress !== database.users[i].emailAdress, 'Het e-mailadres is al in gebruik!')
         }
-        user.id = index++;
+        user.id = index++
         database.users.push(user)
         console.log(database)
-        res.send()
+        res.send(user)
     } catch (err) {
         console.log(err)
-        res.status(400).end();
-        return;
+        res.status(400).end()
+        return
     }  
 })
 
-//202 - 01
+//202
 app.get('/api/user', (req, res) => {
     res.send(database.users)
 })
 
-//202 - 02
-app.post('/api/user?field1=:value1&field2=:value', (req, res) => {
-    res.send()
-})
-
 //203
-app.post('/api/user/profile', (req, res) => {
-    res.send()
+app.get('/api/user/profile', (req, res) => {
+    res.send('deze functionaliteit is nog niet beschikbaar')
 })
 
 //204
-app.post('/api/user/:userId', (req, res) => {
-    res.send()
+app.get('/api/user/:userId', (req, res) => {
+    const userId = req.params.userId
+    for (let i = 0; i < database.users.length; i++) {
+        if (userId === database.users[i].id.toString()) {
+            res.send(database.users[i])
+            return
+        }
+    }
+    res.status(404).send('De userId komt niet overeen met een userId uit de database!')
 })
 
 //205
@@ -81,4 +83,4 @@ app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
 
-module.exports = app;
+module.exports = app
