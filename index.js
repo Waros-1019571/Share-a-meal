@@ -20,7 +20,7 @@ let database = {
         emailAdress: 'm@server.nl',
         password: 'MaarC#isdebeste'
       }
-    ]
+    ],
 };
 
 let index = database.users.length;
@@ -48,7 +48,7 @@ app.post('/api/user', (req, res) => {
 
 //202 - 01
 app.get('/api/user', (req, res) => {
-    res.send()
+    res.send(database.users)
 })
 
 //202 - 02
