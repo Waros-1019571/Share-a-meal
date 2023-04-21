@@ -1,5 +1,6 @@
 const express = require('express')
 const assert = require('assert')
+const logger = require('tracer').colorConsole()
 
 const app = express()
 const port = 1337
@@ -28,7 +29,8 @@ let index = database.users.length
 app.use(express.json())
 
 //201
-app.post('/api/user', (req, res) => {
+const postUser = (req, res) => {
+    logger.debug('POST /api/user aangeroepen met body: ' + JSON.stringify(req.body))
     const user = req.body
     try {
         for (let i = 0; i < database.users.length; i++) {
@@ -37,27 +39,32 @@ app.post('/api/user', (req, res) => {
         }
         user.id = index++
         database.users.push(user)
-        console.log(database)
+        logger.info('User ' + user.id + ' toegevoegd')
         res.send(user)
     } catch (err) {
-        console.log(err)
-        res.status(400).end()
-        return
-    }  
-})
+        logger.error(err.message)
+        res.status(400).end(err.message)
+    }
+}
+app.post('/api/user', postUser)
 
 //202
-app.get('/api/user', (req, res) => {
+const getUsers = (req, res) => {
+    logger.debug('GET /api/user aangeroepen')
     res.send(database.users)
-})
+}
+app.get('/api/user', getUsers)
 
 //203
-app.get('/api/user/profile', (req, res) => {
-    res.send('deze functionaliteit is nog niet beschikbaar')
-})
+const getProfile = (req, res) => {
+    logger.debug('GET /api/user/profile aangeroepen')
+    res.send('Deze functionaliteit is nog niet beschikbaar')
+}
+app.get('/api/user/profile', getProfile)
 
 //204
-app.get('/api/user/:userId', (req, res) => {
+const getUser = (req, res) => {
+    logger.debug('GET /api/user/:userId aangeroepen met userId: ' + req.params.userId)
     const userId = req.params.userId
     for (let i = 0; i < database.users.length; i++) {
         if (userId === database.users[i].id.toString()) {
@@ -65,11 +72,14 @@ app.get('/api/user/:userId', (req, res) => {
             return
         }
     }
+    logger.warn('User ' + userId + ' is niet gevonden')
     res.status(404).send('De userId komt niet overeen met een userId uit de database!')
-})
+}
+app.get('/api/user/:userId', getUser)
 
 //205
-app.put('/api/user/:userId', (req, res) => {
+const putUser = (req, res) => {
+    logger.debug('PUT /api/user/:userId aangeroepen met userId: ' + req.params.userId + ' en body: ' + JSON.stringify(req.body))
     const userId = req.params.userId
     for (let i = 0; i < database.users.length; i++) {
         if (userId === database.users[i].id.toString()) {
@@ -85,15 +95,19 @@ app.put('/api/user/:userId', (req, res) => {
             if (req.body.password != null) {
                 database.users[i].password = req.body.password
             }
+            logger.info('User ' + userId + ' is aangepast')
             res.send(database.users[i])
             return
         }
     }
+    logger.warn('User ' + userId + ' is niet gevonden')
     res.status(404).send('De userId komt niet overeen met een userId uit de database!')
-})
+}
+app.put('/api/user/:userId', putUser)
 
 //206
-app.delete('/api/user/:userId', (req, res) => {
+const deleteUser = (req, res) => {
+    logger.debug('DELETE /api/user/:userId aangeroepen met userId: ' + req.params.userId)
     const userId = req.params.userId
     let deletePosition = null
     for (let i = 0; i < database.users.length; i++) {
@@ -104,15 +118,18 @@ app.delete('/api/user/:userId', (req, res) => {
     }
     if (deletePosition != null) {
         database.users.splice(deletePosition, 1)
+        logger.info('User ' + userId + ' is verwijderd')
         res.send('User met ID ' + userId + ' is verwijderd!')
         return
     }
+    logger.warn('User ' + userId + ' is niet gevonden')
     res.status(404).send('De userId komt niet overeen met een userId uit de database!')
-})
+}
+app.delete('/api/user/:userId', deleteUser)
 
 
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
+    logger.info(`Share-a-meal draait nu op port ${port}`)
 })
 
 module.exports = app
