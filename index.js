@@ -40,7 +40,7 @@ const postUser = (req, res) => {
         user.id = index++
         database.users.push(user)
         logger.info('User ' + user.id + ' toegevoegd')
-        res.send(user)
+        res.status(201).send(user)
     } catch (err) {
         logger.error(err.message)
         res.status(400).end(err.message)
@@ -132,4 +132,4 @@ app.listen(port, () => {
     logger.info(`Share-a-meal draait nu op port ${port}`)
 })
 
-module.exports = app
+module.exports = { app, database }
