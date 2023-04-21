@@ -70,12 +70,44 @@ app.get('/api/user/:userId', (req, res) => {
 
 //205
 app.put('/api/user/:userId', (req, res) => {
-    res.send()
+    const userId = req.params.userId
+    for (let i = 0; i < database.users.length; i++) {
+        if (userId === database.users[i].id.toString()) {
+            if (req.body.firstName != null) {
+                database.users[i].firstName = req.body.firstName
+            }
+            if (req.body.lastName != null) {
+                database.users[i].lastName = req.body.lastName
+            }
+            if (req.body.emailAdress != null) {
+                database.users[i].emailAdress = req.body.emailAdress
+            }
+            if (req.body.password != null) {
+                database.users[i].password = req.body.password
+            }
+            res.send(database.users[i])
+            return
+        }
+    }
+    res.status(404).send('De userId komt niet overeen met een userId uit de database!')
 })
 
 //206
 app.delete('/api/user/:userId', (req, res) => {
-    res.send()
+    const userId = req.params.userId
+    let deletePosition = null
+    for (let i = 0; i < database.users.length; i++) {
+        if (userId === database.users[i].id.toString()) {
+            deletePosition = i
+            break
+        }
+    }
+    if (deletePosition != null) {
+        database.users.splice(deletePosition, 1)
+        res.send('User met ID ' + userId + ' is verwijderd!')
+        return
+    }
+    res.status(404).send('De userId komt niet overeen met een userId uit de database!')
 })
 
 
