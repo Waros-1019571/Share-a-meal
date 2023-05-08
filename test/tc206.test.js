@@ -1,7 +1,7 @@
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 const sut = require('../index').app
-const database = require('../index').database
+const database = require('../src/util/in-memory-database')
 const assert = chai.assert
 chai.use(chaiHttp)
 
