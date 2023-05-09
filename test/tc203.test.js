@@ -15,7 +15,7 @@ describe('TC-203', () => {
             
             // Assert
             assert(res.body.code === 401, '401 must be returned')
-            assert(res.body.message != null, 'Message must be returned')
+            assert(res.body.message === 'Deze functionaliteit is nog niet beschikbaar', 'Message must be returned')
             assert(empty(res.body.data), 'No data must be returned')
             console.log(res.body.message) // Functionality not yet implemented, there is nothing yet to test
             done()
@@ -31,7 +31,7 @@ describe('TC-203', () => {
             
             // Assert
             assert(res.body.code === 200, '200 OK must be returned')
-            assert(res.body.message != null, 'Message must be returned')
+            assert(res.body.message === 'Deze functionaliteit is nog niet beschikbaar', 'Message must be returned')
             assert(empty(res.body.data), 'No data must be returned')
             console.log(res.body.message) // Functionality not yet implemented, there is nothing yet to test
             done()

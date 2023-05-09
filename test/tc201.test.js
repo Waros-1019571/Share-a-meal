@@ -109,6 +109,7 @@ describe('TC-201', () => {
             
             // Assert
             assert(res.body.code === 201, '200 Created must be returned')
+            assert(res.body.message === 'User toegevoegd', 'Correct message returned')
             assert(res.body.data.id === 2, '2 must be user ID')
             assert(res.body.data.firstName === 'Jon', 'User info must be returned')
             assert(res.body.data.lastName === 'Snow', 'User info must be returned')

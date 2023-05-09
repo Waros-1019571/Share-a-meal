@@ -93,19 +93,17 @@ const getUsers = (req, res) => {
 }
 
 //203
-const getProfile = (req, res) => {
+const getProfile = (req, res, next) => {
     logger.debug('GET /api/user/profile aangeroepen')
-    if (empty(req.body)) {
-        res.send({
+    if (empty(req.body) || req.body.token == null) {
+        next({
             code: 401,
-            message: 'Deze functionaliteit is nog niet beschikbaar',
-            data: {}
+            message: 'Deze functionaliteit is nog niet beschikbaar'
         })
     } else {
-        res.send({
+        next({
             code: 200,
-            message: 'Deze functionaliteit is nog niet beschikbaar',
-            data: {}
+            message: 'Deze functionaliteit is nog niet beschikbaar'
         })
     }
 }
@@ -113,6 +111,13 @@ const getProfile = (req, res) => {
 //204
 const getUser = (req, res, next) => {
     logger.debug('GET /api/user/:userId aangeroepen met userId: ' + req.params.userId)
+    if (empty(req.body) || req.body.token == null) {
+        next({
+            code: 401,
+            message: 'Deze functionaliteit is nog niet beschikbaar'
+        })
+        return
+    }
     const userId = Number(req.params.userId)
     try {
         assert(!isNaN(userId), 'Het Id moet een nummer zijn')
@@ -135,10 +140,9 @@ const getUser = (req, res, next) => {
         }
     }
     logger.warn('User ' + userId + ' is niet gevonden')
-    res.status(404).send({
+    next({
         code: 404,
-        message: 'De userId komt niet overeen met een userId uit de database!',
-        data: {}
+        message: 'De userId komt niet overeen met een userId uit de database!'
     })
 }
 
