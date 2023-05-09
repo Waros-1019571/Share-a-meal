@@ -12,7 +12,7 @@ app.use('/api/user', userRoutes)
 app.use('*', (req, res) => {
     logger.warn('Invalid endpoint called: ', req.path)
     res.status(404).json({
-      status: 404,
+      code: 404,
       message: 'Endpoint not found',
       data: {}
     })
@@ -21,8 +21,9 @@ app.use('*', (req, res) => {
 app.use((err, req, res, next) => {
   logger.error(err.code, err.message);
   res.status(err.code).json({
-    statusCode: err.code,
-    message: err.message
+    code: err.code,
+    message: err.message,
+    data: {}
   });
 });
 

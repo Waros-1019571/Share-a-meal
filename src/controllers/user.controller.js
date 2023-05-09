@@ -26,27 +26,40 @@ const postUser = (req, res, next) => {
         })
         return
     }
+    user.id = index++
     database.users.push({
-        id: index++,
+        id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
         emailAdress: user.emailAdress,
         password: user.password,
     })
     logger.info('User ' + user.id + ' toegevoegd')
-    res.status(201).send(user)
+    res.status(201).send({
+        code: 201,
+        message: 'User toegevoegd',
+        data: user
+    })
 }
 
 //202
 const getUsers = (req, res) => {
     logger.debug('GET /api/user aangeroepen')
-    res.send(database.users)
+    res.send({
+        code: 200,
+        message: 'Lijst van users',
+        data: database.users
+    })
 }
 
 //203
 const getProfile = (req, res) => {
     logger.debug('GET /api/user/profile aangeroepen')
-    res.send('Deze functionaliteit is nog niet beschikbaar')
+    res.send({
+        code: 200,
+        message: 'Deze functionaliteit is nog niet beschikbaar',
+        data: {}
+    })
 }
 
 //204
@@ -65,12 +78,20 @@ const getUser = (req, res, next) => {
     }
     for (let i = 0; i < database.users.length; i++) {
         if (userId === database.users[i].id) {
-            res.send(database.users[i])
+            res.send({
+                code: 200,
+                message: 'User gevonden',
+                data: database.users[i]
+            })
             return
         }
     }
     logger.warn('User ' + userId + ' is niet gevonden')
-    res.status(404).send('De userId komt niet overeen met een userId uit de database!')
+    res.status(404).send({
+        code: 404,
+        message: 'De userId komt niet overeen met een userId uit de database!',
+        data: {}
+    })
 }
 
 //205
@@ -111,12 +132,20 @@ const putUser = (req, res, next) => {
                 database.users[i].password = user.password
             }
             logger.info('User ' + userId + ' is aangepast')
-            res.send(database.users[i])
+            res.send({
+                code: 200,
+                message: 'User bijgewerkt',
+                data: database.users[i]
+            })
             return
         }
     }
     logger.warn('User ' + userId + ' is niet gevonden')
-    res.status(404).send('De userId komt niet overeen met een userId uit de database!')
+    res.status(404).send({
+        code: 404,
+        message: 'De userId komt niet overeen met een userId uit de database!',
+        data: {}
+    })
 }
 
 //206
@@ -143,11 +172,19 @@ const deleteUser = (req, res, next) => {
     if (deletePosition != null) {
         database.users.splice(deletePosition, 1)
         logger.info('User ' + userId + ' is verwijderd')
-        res.send('User met ID ' + userId + ' is verwijderd!')
+        res.send({
+            code: 200,
+            message: 'User met ID ' + userId + ' is verwijderd!',
+            data: {}
+        })
         return
     }
     logger.warn('User ' + userId + ' is niet gevonden')
-    res.status(404).send('De userId komt niet overeen met een userId uit de database!')
+    res.status(404).send({
+        code: 404,
+        message: 'De userId komt niet overeen met een userId uit de database!',
+        data: {}
+    })
 }
 
 module.exports = {postUser, getUsers, getProfile, getUser, putUser, deleteUser}

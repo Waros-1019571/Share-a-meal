@@ -10,15 +10,15 @@ describe('TC-202', () => {
         chai.request(sut).get('/api/user').end((err, res) => {
             
             // Assert
-            assert(res.status === 200, '200 OK must be returned')
-            assert(res.body.length >= 2, 'In-memory database starts with two users')
+            assert(res.body.code === 200, '200 OK must be returned')
+            assert(res.body.data.length >= 2, 'In-memory database starts with two users')
             console.log('Users in database: ' + res.body.length)
             for (let i = 0; i < res.body.length; i++) {
-                assert(res.body[i].id != null, 'User info must be returned')
-                assert(res.body[i].firstName != null, 'User info must be returned')
-                assert(res.body[i].lastName != null, 'User info must be returned')
-                assert(res.body[i].emailAdress != null, 'User info must be returned')
-                assert(res.body[i].password != null, 'User info must be returned')
+                assert(res.body.data[i].id != null, 'User info must be returned')
+                assert(res.body.data[i].firstName != null, 'User info must be returned')
+                assert(res.body.data[i].lastName != null, 'User info must be returned')
+                assert(res.body.data[i].emailAdress != null, 'User info must be returned')
+                assert(res.body.data[i].password != null, 'User info must be returned')
             }
             done()
         })
