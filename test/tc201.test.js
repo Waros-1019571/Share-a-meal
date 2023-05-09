@@ -29,6 +29,72 @@ describe('TC-201', () => {
         })
     })
 
+    it('TC-201-2', (done) => {
+        // Arrange
+        const userCount = database.users.length
+        const user = {
+            'firstName': 'Jon',
+            'lastName': 'Snow',
+            'emailAdress': 'jon.nl',
+            'password': 'YouKnowNothingJonSnow'
+        }
+
+        // Act
+        chai.request(sut).post('/api/user').send(user).end((err, res) => {
+            
+            // Assert
+            assert(res.body.code === 400, '400 must be returned')
+            assert(res.body.message === 'Ongelid e-mailadres', 'Correct message')
+            assert(empty(res.body.data), 'No data must be returned')
+            assert(database.users.length === userCount, 'No user must be added')
+            done()
+        })
+    })
+
+    it('TC-201-3', (done) => {
+        // Arrange
+        const userCount = database.users.length
+        const user = {
+            'firstName': 'Jon',
+            'lastName': 'Snow',
+            'emailAdress': 'jon@snow.nl',
+            'password': ''
+        }
+
+        // Act
+        chai.request(sut).post('/api/user').send(user).end((err, res) => {
+            
+            // Assert
+            assert(res.body.code === 400, '400 must be returned')
+            assert(res.body.message === 'Het wachtwoord moet minimaal een karakter lang zijn', 'Correct message')
+            assert(empty(res.body.data), 'No data must be returned')
+            assert(database.users.length === userCount, 'No user must be added')
+            done()
+        })
+    })
+
+    it('TC-201-4', (done) => {
+        // Arrange
+        const userCount = database.users.length
+        const user = {
+            'firstName': 'Jon',
+            'lastName': 'Snow',
+            'emailAdress': 'm@server.nl',
+            'password': 'YouKnowNothingJonSnow'
+        }
+
+        // Act
+        chai.request(sut).post('/api/user').send(user).end((err, res) => {
+            
+            // Assert
+            assert(res.body.code === 403, '403 must be returned')
+            assert(res.body.message === 'Het e-mailadres is al in gebruik!', 'Correct message')
+            assert(empty(res.body.data), 'No data must be returned')
+            assert(database.users.length === userCount, 'No user must be added')
+            done()
+        })
+    })
+
     it('TC-201-5', (done) => {
         // Arrange
         const user = {

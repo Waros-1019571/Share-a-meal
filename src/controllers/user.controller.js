@@ -10,6 +10,7 @@ const postUser = (req, res, next) => {
     try {
         assert(typeof user.emailAdress === 'string', 'Het e-mailadres moet een string zijn')
         assert(user.emailAdress.length !== 0, 'Het e-mailadres moet minimaal een karakter lang zijn')
+        assert(user.emailAdress.includes('@'), 'Ongeldig e-mailadres')
         assert(typeof user.firstName === 'string', 'De voornaam moet een string zijn')
         assert(user.firstName.length !== 0, 'De voornaam moet minimaal een karakter lang zijn')
         assert(typeof user.lastName === 'string', 'De achternaam moet een string zijn')
@@ -20,10 +21,17 @@ const postUser = (req, res, next) => {
             assert(user.emailAdress !== database.users[i].emailAdress, 'Het e-mailadres is al in gebruik!')    
         }
     } catch (err) {
-        next({
-            code: 400,
-            message: err.message
-        })
+        if (err.message === 'Het e-mailadres is al in gebruik!') {
+            next({
+                code: 403,
+                message: err.message
+            })
+        } else {
+            next({
+                code: 400,
+                message: err.message
+            })
+        }
         return
     }
     user.id = index++
