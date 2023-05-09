@@ -1,5 +1,6 @@
 const assert = require('assert')
 const logger = require('tracer').colorConsole()
+const empty = require('../util/empty')
 const database = require('../util/in-memory-database')
 let index = database.users.length
 
@@ -52,11 +53,6 @@ const postUser = (req, res, next) => {
     })
 }
 
-/* id: 0,
-        firstName: 'Hendrik',
-        lastName: 'van Dam',
-        emailAdress: 'hvd@server.nl',*/
-
 //202
 const getUsers = (req, res) => {
     logger.debug('GET /api/user aangeroepen')
@@ -99,11 +95,19 @@ const getUsers = (req, res) => {
 //203
 const getProfile = (req, res) => {
     logger.debug('GET /api/user/profile aangeroepen')
-    res.send({
-        code: 200,
-        message: 'Deze functionaliteit is nog niet beschikbaar',
-        data: {}
-    })
+    if (empty(req.body)) {
+        res.send({
+            code: 401,
+            message: 'Deze functionaliteit is nog niet beschikbaar',
+            data: {}
+        })
+    } else {
+        res.send({
+            code: 200,
+            message: 'Deze functionaliteit is nog niet beschikbaar',
+            data: {}
+        })
+    }
 }
 
 //204

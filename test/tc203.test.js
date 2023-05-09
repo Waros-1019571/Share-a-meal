@@ -6,9 +6,28 @@ const assert = chai.assert
 chai.use(chaiHttp)
 
 describe('TC-203', () => {
-    it('TC-203-2', (done) => {
+    it('TC-203-1', (done) => {
+        // Arrange
+        const token = {}
+
         // Act
-        chai.request(sut).get('/api/user/profile').end((err, res) => {
+        chai.request(sut).get('/api/user/profile').send(token).end((err, res) => {
+            
+            // Assert
+            assert(res.body.code === 401, '401 must be returned')
+            assert(res.body.message != null, 'Message must be returned')
+            assert(empty(res.body.data), 'No data must be returned')
+            console.log(res.body.message) // Functionality not yet implemented, there is nothing yet to test
+            done()
+        })
+    })
+
+    it('TC-203-2', (done) => {
+        // Arrange
+        const token = {token: ''}
+
+        // Act
+        chai.request(sut).get('/api/user/profile').send(token).end((err, res) => {
             
             // Assert
             assert(res.body.code === 200, '200 OK must be returned')
