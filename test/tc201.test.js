@@ -44,7 +44,7 @@ describe('TC-201', () => {
             
             // Assert
             assert(res.body.code === 400, '400 must be returned')
-            assert(res.body.message === 'Ongelid e-mailadres', 'Correct message')
+            assert(res.body.message === 'Ongeldig e-mailadres', 'Correct message')
             assert(empty(res.body.data), 'No data must be returned')
             assert(database.users.length === userCount, 'No user must be added')
             done()
@@ -114,6 +114,7 @@ describe('TC-201', () => {
             assert(res.body.data.lastName === 'Snow', 'User info must be returned')
             assert(res.body.data.emailAdress === 'jon@snow.nl', 'User info must be returned')
             assert(res.body.data.password === 'YouKnowNothingJonSnow', 'User info must be returned')
+            assert(res.body.data.isActive === true, 'User must be active')
             done()
         })
     })

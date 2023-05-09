@@ -5,14 +5,16 @@ module.exports = {
         firstName: 'Hendrik',
         lastName: 'van Dam',
         emailAdress: 'hvd@server.nl',
-        password: 'PythonisbeterdanJava'
+        password: 'PythonisbeterdanJava',
+        isActive: false
       },
       {
         id: 1,
         firstName: 'Marieke',
         lastName: 'Jansen',
         emailAdress: 'm@server.nl',
-        password: 'MaarC#isdebeste'
+        password: 'MaarC#isdebeste',
+        isActive: true
       }
     ],
 }

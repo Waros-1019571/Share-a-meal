@@ -19,10 +19,10 @@ app.use('*', (req, res) => {
 })
 
 app.use((err, req, res, next) => {
-  logger.error(err.code, err.message);
-  res.status(err.code).json({
-    code: err.code,
-    message: err.message,
+  logger.error(err?.code, err?.message);
+  res.status(err?.code ?? 500).json({
+    code: err?.code ?? 500,
+    message: err?.message ?? 'Unknown error',
     data: {}
   });
 });

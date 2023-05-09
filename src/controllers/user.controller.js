@@ -35,12 +35,14 @@ const postUser = (req, res, next) => {
         return
     }
     user.id = index++
+    user.isActive = true
     database.users.push({
         id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
         emailAdress: user.emailAdress,
         password: user.password,
+        isActive: user.isActive
     })
     logger.info('User ' + user.id + ' toegevoegd')
     res.status(201).send({
@@ -50,13 +52,47 @@ const postUser = (req, res, next) => {
     })
 }
 
+/* id: 0,
+        firstName: 'Hendrik',
+        lastName: 'van Dam',
+        emailAdress: 'hvd@server.nl',*/
+
 //202
 const getUsers = (req, res) => {
     logger.debug('GET /api/user aangeroepen')
+    let users = database.users
+    // User ID filter
+    if (req.body.userId != null) {
+        const userId = Number(req.params.userId)
+        if (!isNaN(userId)) {
+            logger.debug('Filtering on userId ' + userId)
+            users = users.filter(user => user.id === userId)
+        }
+    }
+    // First name filter
+    if (req.body.firstName != null && typeof req.body.firstName === 'string') {
+        logger.debug('Filtering on first name ' + req.body.firstName)
+        users = users.filter(user => user.firstName === req.body.firstName)
+    }
+    // Last name filter
+    if (req.body.lastName != null && typeof req.body.lastName === 'string') {
+        logger.debug('Filtering on last name ' + req.body.lastName)
+        users = users.filter(user => user.lastName === req.body.lastName)
+    }
+    // Email address filter
+    if (req.body.emailAdress != null && typeof req.body.emailAdress === 'string') {
+        logger.debug('Filtering on email address ' + req.body.emailAdress)
+        users = users.filter(user => user.emailAdress === req.body.emailAdress)
+    }
+    // Is active filter
+    if (req.body.isActive != null && typeof req.body.isActive === 'boolean') {
+        logger.debug('Filtering on isActive ' + req.body.isActive)
+        users = users.filter(user => user.isActive === req.body.isActive)
+    }
     res.send({
         code: 200,
         message: 'Lijst van users',
-        data: database.users
+        data: users
     })
 }
 
