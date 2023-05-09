@@ -11,6 +11,7 @@ describe('TC-202', () => {
             
             // Assert
             assert(res.body.code === 200, '200 OK must be returned')
+            assert(res.body.message === 'Lijst van users', 'Correct message returned')
             assert(res.body.data.length >= 2, 'In-memory database starts with two users')
             console.log('Users in database: ' + res.body.data.length)
             for (let i = 0; i < res.body.length; i++) {
@@ -36,6 +37,7 @@ describe('TC-202', () => {
             
             // Assert
             assert(res.body.code === 200, '200 OK must be returned')
+            assert(res.body.message === 'Lijst van users', 'Correct message returned')
             assert(res.body.data.length >= 2, 'In-memory database starts with two users')
             console.log('Users in database: ' + res.body.data.length)
             for (let i = 0; i < res.body.length; i++) {
@@ -61,6 +63,7 @@ describe('TC-202', () => {
             
             // Assert
             assert(res.body.code === 200, '200 OK must be returned')
+            assert(res.body.message === 'Lijst van users', 'Correct message returned')
             assert(res.body.data.length === 1, 'In-memory database has one non active user')
             assert(res.body.data[0].id != null, 'User info must be returned')
             assert(res.body.data[0].firstName != null, 'User info must be returned')
@@ -83,6 +86,7 @@ describe('TC-202', () => {
             
             // Assert
             assert(res.body.code === 200, '200 OK must be returned')
+            assert(res.body.message === 'Lijst van users', 'Correct message returned')
             for (let i = 0; i < res.body.length; i++) {
                 assert(res.body.data[i].id != null, 'User info must be returned')
                 assert(res.body.data[i].firstName != null, 'User info must be returned')
@@ -107,6 +111,7 @@ describe('TC-202', () => {
             
             // Assert
             assert(res.body.code === 200, '200 OK must be returned')
+            assert(res.body.message === 'Lijst van users', 'Correct message returned')
             assert(res.body.data[0].id === 0, 'Correct user must be returned')
             assert(res.body.data[0].firstName === 'Hendrik', 'Correct user must be returned')
             assert(res.body.data[0].lastName === 'van Dam', 'Correct user must be returned')
