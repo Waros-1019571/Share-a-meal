@@ -4,7 +4,7 @@ const database = require('../util/in-memory-database')
 let index = database.users.length
 
 //201
-const postUser = (req, res) => {
+const postUser = (req, res, next) => {
     logger.debug('POST /api/user aangeroepen met body: ' + JSON.stringify(req.body))
     const user = req.body
     try {
@@ -20,8 +20,10 @@ const postUser = (req, res) => {
             assert(user.emailAdress !== database.users[i].emailAdress, 'Het e-mailadres is al in gebruik!')    
         }
     } catch (err) {
-        logger.error(err.message)
-        res.status(400).end(err.message)
+        next({
+            code: 400,
+            message: err.message
+        })
         return
     }
     database.users.push({
@@ -48,15 +50,17 @@ const getProfile = (req, res) => {
 }
 
 //204
-const getUser = (req, res) => {
+const getUser = (req, res, next) => {
     logger.debug('GET /api/user/:userId aangeroepen met userId: ' + req.params.userId)
     const userId = Number(req.params.userId)
     try {
         assert(!isNaN(userId), 'Het Id moet een nummer zijn')
         assert(userId >= 0, 'Het id moet minimaal \'0\' zijn')
     } catch (err) {
-        logger.error(err.message)
-        res.status(400).end(err.message)
+        next({
+            code: 400,
+            message: err.message
+        })
         return
     }
     for (let i = 0; i < database.users.length; i++) {
@@ -70,7 +74,7 @@ const getUser = (req, res) => {
 }
 
 //205
-const putUser = (req, res) => {
+const putUser = (req, res, next) => {
     logger.debug('PUT /api/user/:userId aangeroepen met userId: ' + req.params.userId + ' en body: ' + JSON.stringify(req.body))
     const userId = Number(req.params.userId)
     const user = req.body
@@ -86,8 +90,10 @@ const putUser = (req, res) => {
         assert(user.password == null    || typeof user.password === 'string', 'Het wachtwoord moet een string zijn')
         assert(user.password == null    || user.password.length !== 0, 'Het wachtwoord moet minimaal een karakter lang zijn')
     } catch (err) {
-        logger.error(err.message)
-        res.status(400).end(err.message)
+        next({
+            code: 400,
+            message: err.message
+        })
         return
     }
     for (let i = 0; i < database.users.length; i++) {
@@ -114,15 +120,17 @@ const putUser = (req, res) => {
 }
 
 //206
-const deleteUser = (req, res) => {
+const deleteUser = (req, res, next) => {
     logger.debug('DELETE /api/user/:userId aangeroepen met userId: ' + req.params.userId)
     const userId = Number(req.params.userId)
     try {
         assert(!isNaN(userId), 'Het Id moet een nummer zijn')
         assert(userId >= 0, 'Het id moet minimaal \'0\' zijn')
     } catch (err) {
-        logger.error(err.message)
-        res.status(400).end(err.message)
+        next({
+            code: 400,
+            message: err.message
+        })
         return
     }
     let deletePosition = null
