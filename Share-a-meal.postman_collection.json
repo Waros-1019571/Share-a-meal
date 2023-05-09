@@ -36,9 +36,21 @@
 		},
 		{
 			"name": "use case 202",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
 			"request": {
 				"method": "GET",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": 0,\r\n    \"firstName\": \"Hendrik\",\r\n    \"lastName\": \"van Dam\",\r\n    \"emailAdress\": \"hvd@server.nl\",\r\n    \"password\": \"PythonisbeterdanJava\",\r\n    \"isActive\": false\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
 					"raw": "localhost:1337/api/user",
 					"host": [
@@ -100,7 +112,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{ \"firstName\": \"Mauro\",\r\n \"lastName\": \"Hamkaas\",\r\n\"emailAdress\": \"pk@21.it\",\r\n\"password\": \"PythonisbeterdanJava\"\r\n}",
+					"raw": "{ \r\n    \"firstName\": \"Arya\",\r\n    \"lastName\": \"Stark\",\r\n    \"emailAdress\": \"pk@21.it\",\r\n    \"password\": \"PythonisbeterdanJava\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -128,7 +140,7 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "localhost:1337/api/user/",
+					"raw": "localhost:1337/api/user/1",
 					"host": [
 						"localhost"
 					],
@@ -136,7 +148,7 @@
 					"path": [
 						"api",
 						"user",
-						""
+						"1"
 					]
 				}
 			},
