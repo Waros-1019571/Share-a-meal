@@ -220,6 +220,13 @@ const putUser = (req, res, next) => {
 //206
 const deleteUser = (req, res, next) => {
     logger.debug('DELETE /api/user/:userId aangeroepen met userId: ' + req.params.userId)
+    if (empty(req.body) || req.body.token == null) {
+        next({
+            code: 401,
+            message: 'Deze functionaliteit is nog niet beschikbaar'
+        })
+        return
+    }
     const userId = Number(req.params.userId)
     try {
         assert(!isNaN(userId), 'Het Id moet een nummer zijn')
@@ -249,10 +256,9 @@ const deleteUser = (req, res, next) => {
         return
     }
     logger.warn('User ' + userId + ' is niet gevonden')
-    res.status(404).send({
+    next({
         code: 404,
-        message: 'De userId komt niet overeen met een userId uit de database!',
-        data: {}
+        message: 'De userId komt niet overeen met een userId uit de database!'
     })
 }
 
