@@ -3,7 +3,7 @@ const userRoutes = require('./src/routes/user.routes')
 const logger = require('tracer').colorConsole()
 
 const app = express()
-const port = 1337
+const port = process.env.PORT || 1337
 
 app.use(express.json())
 
