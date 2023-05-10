@@ -6,6 +6,7 @@ module.exports = {
         lastName: 'van Dam',
         emailAdress: 'hvd@server.nl',
         password: 'PythonisbeterdanJava',
+        phoneNumber: '0612345678',
         isActive: false
       },
       {
@@ -14,6 +15,7 @@ module.exports = {
         lastName: 'Jansen',
         emailAdress: 'm@server.nl',
         password: 'MaarC#isdebeste',
+        phoneNumber: '0165123456',
         isActive: true
       }
     ],

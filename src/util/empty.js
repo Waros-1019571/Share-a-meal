@@ -1,1 +1,1 @@
-module.exports = (json) => json == null || Object.keys(json).length === 0;
+module.exports = (json) => json == null || Object.keys(json).length === 0
