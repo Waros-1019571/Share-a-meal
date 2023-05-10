@@ -14,7 +14,8 @@ describe('TC-201', () => {
             'firstName': 'Jon',
             'lastName': 'Snow',
             'emailAdress': '',
-            'password': 'YouKnowNothingJonSnow'
+            'password': 'YouKnowNothingJonSnow',
+            'phoneNumber': '0612345678'
         }
 
         // Act
@@ -36,7 +37,8 @@ describe('TC-201', () => {
             'firstName': 'Jon',
             'lastName': 'Snow',
             'emailAdress': 'jon.nl',
-            'password': 'YouKnowNothingJonSnow'
+            'password': 'YouKnowNothingJonSnow',
+            'phoneNumber': '0612345678'
         }
 
         // Act
@@ -58,7 +60,8 @@ describe('TC-201', () => {
             'firstName': 'Jon',
             'lastName': 'Snow',
             'emailAdress': 'jon@snow.nl',
-            'password': ''
+            'password': '',
+            'phoneNumber': '0612345678'
         }
 
         // Act
@@ -80,7 +83,8 @@ describe('TC-201', () => {
             'firstName': 'Jon',
             'lastName': 'Snow',
             'emailAdress': 'm@server.nl',
-            'password': 'YouKnowNothingJonSnow'
+            'password': 'YouKnowNothingJonSnow',
+            'phoneNumber': '0612345678'
         }
 
         // Act
@@ -101,7 +105,8 @@ describe('TC-201', () => {
             'firstName': 'Jon',
             'lastName': 'Snow',
             'emailAdress': 'jon@snow.nl',
-            'password': 'YouKnowNothingJonSnow'
+            'password': 'YouKnowNothingJonSnow',
+            'phoneNumber': '0612345678'
         }
 
         // Act

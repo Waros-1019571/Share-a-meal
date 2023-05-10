@@ -24,8 +24,8 @@ app.use((err, req, res, next) => {
     code: err?.code ?? 500,
     message: err?.message ?? 'Unknown error',
     data: {}
-  });
-});
+  })
+})
 
 app.listen(port, () => {
     logger.info(`Share-a-meal draait nu op port ${port}`)

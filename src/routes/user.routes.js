@@ -16,4 +16,4 @@ router.put('/:userId', userController.putUser)
 router.delete('/:userId', userController.deleteUser)
 
 
-module.exports = router;
+module.exports = router
