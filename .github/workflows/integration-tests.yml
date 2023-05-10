@@ -1,25 +1,34 @@
-name: Run the integration tests
-
+name: Run the integration tests and deploy
 on:
-    push:
-        branches:
-           - master
-
+  push:
+    branches:
+      - master
+      - feature/deploy
 jobs:
-    integrationtests:
-        runs-on: ubuntu-latest
-        steps:
-            # Checkout the Repo
-            - uses: actions/checkout@v2
-
-            # Install Node 16
-            - name: Setup Node
-              uses: actions/setup-node@v1
-              with:
-                  node-version: 16
-
-            # Install dependencies
-            - run: npm install
-
-            # Run tests
-            - run: npm test
+  integrationtests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16
+      - run: npm install
+      - run: npm test
+  Railway-deploy:
+    needs: integrationtests
+    runs-on: ubuntu-latest
+    environment:
+        name: Railway
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@main
+      - name: Current token
+        run: |
+          echo "secrets.RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}"
+      - name: Install Railway
+        run: npm i -g @railway/cli
+      - name: Deploy server to Railway
+        run: railway up
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
