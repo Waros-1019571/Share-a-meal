@@ -1,11 +1,17 @@
 const chai = require('chai')
 const chaiHttp = require('chai-http')
+const testDatabase = require('./test-database')
 const empty = require('../src/util/empty')
 const sut = require('../index').app
 const assert = chai.assert
 chai.use(chaiHttp)
 
 describe('TC-204', () => {
+    // Reset database before each test
+    beforeEach((done) => {
+        testDatabase(done)
+    })
+
     it('TC-204-1', (done) => {
         // Arrange
         const userID = 2
