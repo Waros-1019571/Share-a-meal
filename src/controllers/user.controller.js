@@ -348,27 +348,43 @@ const deleteUser = (req, res, next) => {
         })
         return
     }
-    let deletePosition = null
-    for (let i = 0; i < inmemorydb.users.length; i++) {
-        if (userId === inmemorydb.users[i].id) {
-            deletePosition = i
-            break
+    database.getConnection((err, conn) => {
+        if (err) {
+            logger.error(err.code, err.syscall, err.address, err.port)
+            next({
+                code: 500,
+                message: err.code
+            })
         }
-    }
-    if (deletePosition != null) {
-        inmemorydb.users.splice(deletePosition, 1)
-        logger.info('User ' + userId + ' is verwijderd')
-        res.send({
-            code: 200,
-            message: 'User met ID ' + userId + ' is verwijderd!',
-            data: {}
-        })
-        return
-    }
-    logger.warn('User ' + userId + ' is niet gevonden')
-    next({
-        code: 404,
-        message: 'De userId komt niet overeen met een userId uit de database!'
+        if (conn) {
+            const deleteQuery = 'DELETE FROM `user` WHERE id = ?'
+            conn.query(deleteQuery, [userId], (err, results, fields) => {
+                if (err || !results) {
+                    logger.error(err.message);
+                    next({
+                        code: 500,
+                        message: err.message
+                    })
+                    database.releaseConnection(conn)
+                    return
+                }
+                if (results.affectedRows === 0) {
+                    logger.warn('User ' + userId + ' is niet gevonden')
+                    next({
+                        code: 404,
+                        message: 'De userId komt niet overeen met een userId uit de database!'
+                    })
+                    database.releaseConnection(conn)
+                    return
+                }
+                res.status(200).send({
+                    code: 200,
+                    message: 'User met ID ' + userId + ' is verwijderd!',
+                    data: results[0]
+                })
+                database.releaseConnection(conn)
+            })
+        }
     })
 }
 
