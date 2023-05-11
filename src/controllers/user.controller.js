@@ -1,7 +1,6 @@
 const assert = require('assert')
 const logger = require('tracer').colorConsole()
 const empty = require('../util/empty')
-const inmemorydb = require('../util/in-memory-database')
 const database = require('../util/mysql')
 const whereBuilder = require('../util/where-builder')
 const setBuilder = require('../util/set-builder')
