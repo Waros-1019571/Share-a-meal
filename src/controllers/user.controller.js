@@ -6,6 +6,8 @@ const database = require('../util/mysql')
 const whereBuilder = require('../util/where-builder')
 const sqlBool = require('../util/sql-bool')
 
+const getByIdQuery = 'SELECT * FROM `user` WHERE id = ?'
+
 //201
 const postUser = (req, res, next) => {
     logger.debug('POST /api/user aangeroepen met body: ' + JSON.stringify(req.body))
@@ -79,7 +81,6 @@ const postUser = (req, res, next) => {
                     }
                     logger.info('User ' + results.insertId + ' toegevoegd')
                     // Section - get new user
-                    const getByIdQuery = 'SELECT * FROM `user` WHERE id = ?'
                     conn.query(getByIdQuery, [results.insertId], (err, results, fields) => {
                         if (err || !results) {
                             logger.error(err.message);
@@ -184,7 +185,7 @@ const getUsers = (req, res, next) => {
             })
             database.releaseConnection(conn)
         }
-    });
+    })
 }
 
 //203
@@ -224,20 +225,42 @@ const getUser = (req, res, next) => {
         })
         return
     }
-    for (let i = 0; i < inmemorydb.users.length; i++) {
-        if (userId === inmemorydb.users[i].id) {
-            res.send({
-                code: 200,
-                message: 'User gevonden',
-                data: inmemorydb.users[i]
+    database.getConnection((err, conn) => {
+        if (err) {
+            logger.error(err.code, err.syscall, err.address, err.port)
+            next({
+                code: 500,
+                message: err.code
             })
-            return
         }
-    }
-    logger.warn('User ' + userId + ' is niet gevonden')
-    next({
-        code: 404,
-        message: 'De userId komt niet overeen met een userId uit de database!'
+        if (conn) {
+            conn.query(getByIdQuery, [userId], (err, results, fields) => {
+                if (err || !results) {
+                    logger.error(err.message);
+                    next({
+                        code: 500,
+                        message: err.message
+                    })
+                    database.releaseConnection(conn)
+                    return
+                }
+                if (results.length === 0) {
+                    logger.warn('User ' + userId + ' is niet gevonden')
+                    next({
+                        code: 404,
+                        message: 'De userId komt niet overeen met een userId uit de database!'
+                    })
+                    database.releaseConnection(conn)
+                    return
+                }
+                res.status(200).send({
+                    code: 200,
+                    message: 'User gevonden',
+                    data: results[0]
+                })
+                database.releaseConnection(conn)
+            })
+        }
     })
 }
 

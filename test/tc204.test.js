@@ -8,7 +8,7 @@ chai.use(chaiHttp)
 describe('TC-204', () => {
     it('TC-204-1', (done) => {
         // Arrange
-        const userID = 1
+        const userID = 2
         const token = {}
         
         // Act
@@ -40,13 +40,14 @@ describe('TC-204', () => {
 
     it('TC-204-3', (done) => {
         // Arrange
-        const userID = 1
+        const userID = 2
         const token = {token:''}
         
         // Act
         chai.request(sut).get('/api/user/' + userID).send(token).end((err, res) => {
             
             // Assert
+            console.log(res.body.code)
             assert(res.body.code === 200, '200 OK must be returned')
             assert(res.body.message === 'User gevonden', 'Correct message returned')
             assert(res.body.data.id === userID, 'User with ID 1 returned')
@@ -54,6 +55,8 @@ describe('TC-204', () => {
             assert(res.body.data.lastName === 'Jansen', 'User info must be returned')
             assert(res.body.data.emailAdress === 'm@server.nl', 'User info must be returned')
             assert(res.body.data.password === 'MaarC#isdebeste', 'User info must be returned')
+            assert(res.body.data.street === 'Damstraat', 'User info must be returned')
+            assert(res.body.data.city === 'Jansendorp', 'User info must be returned')
             done()
         })
     })
