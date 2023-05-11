@@ -4,6 +4,7 @@ const empty = require('../util/empty')
 const inmemorydb = require('../util/in-memory-database')
 const database = require('../util/mysql')
 const whereBuilder = require('../util/where-builder')
+const setBuilder = require('../util/set-builder')
 const sqlBool = require('../util/sql-bool')
 
 const getByIdQuery = 'SELECT * FROM `user` WHERE id = ?'
@@ -105,7 +106,7 @@ const postUser = (req, res, next) => {
 }
 
 //202
-const userQuery = (req) => {
+const getUsersQuery = (req) => {
     let query = 'SELECT * FROM `user`'
     let count = 0
     // User ID filter
@@ -155,7 +156,7 @@ const userQuery = (req) => {
 }
 const getUsers = (req, res, next) => {
     logger.debug('GET /api/user aangeroepen')
-    const query = userQuery(req)
+    const query = getUsersQuery(req)
     logger.debug('Query: ' + query)
     database.getConnection((err, conn) => {
         if (err) {
@@ -265,6 +266,61 @@ const getUser = (req, res, next) => {
 }
 
 //205
+const updateUserQuery = (req) => {
+    let query = 'UPDATE `user` '
+    let count = 0
+    const user = req.body
+
+    // Email address (required)
+    assert(typeof user.emailAdress === 'string', 'Het e-mailadres moet een string zijn')
+    assert(user.emailAdress.length !== 0, 'Het e-mailadres moet minimaal een karakter lang zijn')
+    query += setBuilder('`emailAdress`=\'' + user.emailAdress + '\'', count++)
+    // First name
+    if (user.firstName != null) {
+        assert(typeof user.firstName === 'string', 'De voornaam moet een string zijn')
+        assert(user.firstName.length !== 0, 'De voornaam moet minimaal een karakter lang zijn')
+        query += setBuilder('`firstName`=\'' + user.firstName + '\'', count++)
+    }
+    // Last name
+    if (user.lastName != null) {
+        assert(typeof user.lastName === 'string', 'De achternaam moet een string zijn')
+        assert(user.lastName.length !== 0, 'De achternaam moet minimaal een karakter lang zijn')
+        query += setBuilder('`lastName`=\'' + user.lastName + '\'', count++)
+    }
+    // Password
+    if (user.password != null) {
+        assert(typeof user.password === 'string', 'Het wachtwoord moet een string zijn')
+        assert(user.password.length !== 0, 'Het wachtwoord moet minimaal een karakter lang zijn')
+        query += setBuilder('`password`=\'' + user.password + '\'', count++)
+    }
+    // Phone number
+    if (user.phoneNumber != null) {
+        assert(typeof user.phoneNumber === 'string', 'Het telefoonnummer moet een string zijn')
+        assert(user.phoneNumber.length === 10, 'Het telefoonnummer moet tien karakers lang zijn')
+        query += setBuilder('`phoneNumber`=\'' + user.phoneNumber + '\'', count++)
+    }
+    // Street
+    if (user.street != null) {
+        assert(typeof user.street === 'string', 'De straat moet een string zijn')
+        assert(user.street.length > 0, 'De straat moet minimaal een karakter lang zijn')
+        query += setBuilder('`street`=\'' + user.street+ '\'', count++)
+    }
+    // City
+    if (user.city != null) {
+        assert(typeof user.city === 'string', 'De stad moet een string zijn')
+        assert(user.city.length > 0, 'De stad moet minimaal een karakter lang zijn')
+        query += setBuilder('`city`=\'' + user.city+ '\'', count++)
+    }
+    
+    // ID
+    const userId = Number(req.params.userId)
+    assert(!isNaN(userId), 'Het Id moet een nummer zijn')
+    assert(userId >= 0, 'Het id moet minimaal \'0\' zijn')
+    query += ' WHERE `id`=' + userId
+    console.log(query)
+    return query
+}
+
 const putUser = (req, res, next) => {
     logger.debug('PUT /api/user/:userId aangeroepen met userId: ' + req.params.userId + ' en body: ' + JSON.stringify(req.body))
     if (empty(req.body) || req.body.token == null) {
@@ -274,21 +330,10 @@ const putUser = (req, res, next) => {
         })
         return
     }
-    const userId = Number(req.params.userId)
-    const user = req.body
+
+    let updateQuery;
     try {
-        assert(!isNaN(userId), 'Het Id moet een nummer zijn')
-        assert(userId >= 0, 'Het id moet minimaal \'0\' zijn')
-        assert(typeof user.emailAdress === 'string', 'Het e-mailadres moet een string zijn')
-        assert(user.emailAdress.length !== 0, 'Het e-mailadres moet minimaal een karakter lang zijn')
-        assert(user.firstName == null || typeof user.firstName === 'string', 'De voornaam moet een string zijn')
-        assert(user.firstName == null || user.firstName.length !== 0, 'De voornaam moet minimaal een karakter lang zijn')
-        assert(user.lastName == null || typeof user.lastName === 'string', 'De achternaam moet een string zijn')
-        assert(user.lastName == null || user.lastName.length !== 0, 'De achternaam moet minimaal een karakter lang zijn')
-        assert(user.password == null || typeof user.password === 'string', 'Het wachtwoord moet een string zijn')
-        assert(user.password == null || user.password.length !== 0, 'Het wachtwoord moet minimaal een karakter lang zijn')
-        assert(user.phoneNumber == null || typeof user.phoneNumber === 'string', 'Het telefoonnummer moet een string zijn')
-        assert(user.phoneNumber == null || user.phoneNumber.length === 10, 'Het telefoonnummer moet tien karakers lang zijn')
+        updateQuery = updateUserQuery(req)
     } catch (err) {
         next({
             code: 400,
@@ -296,34 +341,55 @@ const putUser = (req, res, next) => {
         })
         return
     }
-    for (let i = 0; i < inmemorydb.users.length; i++) {
-        if (userId === inmemorydb.users[i].id) {
-            inmemorydb.users[i].emailAdress = user.emailAdress
-            if (req.body.firstName != null) {
-                inmemorydb.users[i].firstName = user.firstName
-            }
-            if (req.body.lastName != null) {
-                inmemorydb.users[i].lastName = user.lastName
-            }
-            if (req.body.password != null) {
-                inmemorydb.users[i].password = user.password
-            }
-            if (req.body.phoneNumber != null) {
-                inmemorydb.users[i].phoneNumber = user.phoneNumber
-            }
-            logger.info('User ' + userId + ' is aangepast')
-            res.send({
-                code: 200,
-                message: 'User bijgewerkt',
-                data: inmemorydb.users[i]
+    const userId = Number(req.params.userId)
+    database.getConnection((err, conn) => {
+        if (err) {
+            logger.error(err.code, err.syscall, err.address, err.port)
+            next({
+                code: 500,
+                message: err.code
             })
-            return
         }
-    }
-    logger.warn('User ' + userId + ' is niet gevonden')
-    next({
-        code: 404,
-        message: 'De userId komt niet overeen met een userId uit de database!'
+        if (conn) {
+            conn.query(updateQuery, (err, results, fields) => {
+                if (err || !results) {
+                    logger.error(err.message);
+                    next({
+                        code: 500,
+                        message: err.message
+                    })
+                    database.releaseConnection(conn)
+                    return
+                }
+                if (results.affectedRows === 0) {
+                    logger.warn('User ' + userId + ' is niet gevonden')
+                    next({
+                        code: 404,
+                        message: 'De userId komt niet overeen met een userId uit de database!'
+                    })
+                    database.releaseConnection(conn)
+                    return
+                }
+                // Section - get updated user
+                conn.query(getByIdQuery, [userId], (err, results, fields) => {
+                    if (err || !results) {
+                        logger.error(err.message);
+                        next({
+                            code: 500,
+                            message: err.message
+                        })
+                        database.releaseConnection(conn)
+                        return
+                    }
+                    res.status(200).send({
+                        code: 200,
+                        message: 'User bijgewerkt',
+                        data: results[0]
+                    })
+                    database.releaseConnection(conn)
+                })
+            })
+        }
     })
 }
 
