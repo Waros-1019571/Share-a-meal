@@ -1,8 +1,11 @@
 const assert = require('assert')
 const logger = require('tracer').colorConsole()
 const empty = require('../util/empty')
-const database = require('../util/in-memory-database')
-let index = database.users.length
+const inmemorydb = require('../util/in-memory-database')
+const database = require('../util/mysql')
+const whereBuilder = require('../util/where-builder')
+const sqlBool = require('../util/sql-bool')
+let index = inmemorydb.users.length
 
 //201
 const postUser = (req, res, next) => {
@@ -20,8 +23,8 @@ const postUser = (req, res, next) => {
         assert(user.password.length > 0, 'Het wachtwoord moet minimaal een karakter lang zijn')
         assert(typeof user.phoneNumber === 'string', 'Het telefoonnummer moet een string zijn')
         assert(user.phoneNumber.length === 10, 'Het telefoonnummer moet tien karakers lang zijn')
-        for (let i = 0; i < database.users.length; i++) {
-            assert(user.emailAdress !== database.users[i].emailAdress, 'Het e-mailadres is al in gebruik!')    
+        for (let i = 0; i < inmemorydb.users.length; i++) {
+            assert(user.emailAdress !== inmemorydb.users[i].emailAdress, 'Het e-mailadres is al in gebruik!')
         }
     } catch (err) {
         if (err.message === 'Het e-mailadres is al in gebruik!') {
@@ -39,7 +42,7 @@ const postUser = (req, res, next) => {
     }
     user.id = index++
     user.isActive = true
-    database.users.push({
+    inmemorydb.users.push({
         id: user.id,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -57,47 +60,88 @@ const postUser = (req, res, next) => {
 }
 
 //202
-const getUsers = (req, res) => {
-    logger.debug('GET /api/user aangeroepen')
-    let users = database.users
+const userQuery = (req) => {
+    let query = 'SELECT * FROM `user`'
+    let count = 0
     // User ID filter
-    if (req.body.userId != null) {
+    if (req.body.id != null) {
         const userId = Number(req.params.userId)
         if (!isNaN(userId)) {
-            logger.debug('Filtering on userId ' + userId)
-            users = users.filter(user => user.id === userId)
+            logger.debug('Filtering on userId ' + id)
+            query += whereBuilder('id=' + id, count++)
         }
     }
     // First name filter
     if (req.body.firstName != null && typeof req.body.firstName === 'string') {
         logger.debug('Filtering on first name ' + req.body.firstName)
-        users = users.filter(user => user.firstName === req.body.firstName)
+        query += whereBuilder('`firstName` = \'' + req.body.firstName + '\'', count++)
     }
     // Last name filter
     if (req.body.lastName != null && typeof req.body.lastName === 'string') {
         logger.debug('Filtering on last name ' + req.body.lastName)
-        users = users.filter(user => user.lastName === req.body.lastName)
+        query += whereBuilder('`lastName` = \'' + req.body.lastName + '\'', count++)
     }
     // Email address filter
     if (req.body.emailAdress != null && typeof req.body.emailAdress === 'string') {
         logger.debug('Filtering on email address ' + req.body.emailAdress)
-        users = users.filter(user => user.emailAdress === req.body.emailAdress)
+        query += whereBuilder('`emailAdress` = \'' + req.body.emailAdress + '\'', count++)
     }
-     // Phone number filter
-     if (req.body.phoneNumber != null && typeof req.body.phoneNumber === 'string') {
+    // Phone number filter
+    if (req.body.phoneNumber != null && typeof req.body.phoneNumber === 'string') {
         logger.debug('Filtering on phone number ' + req.body.phoneNumber)
-        users = users.filter(user => user.phoneNumber === req.body.phoneNumber)
+        query += whereBuilder('`phoneNumber` = \'' + req.body.phoneNumber + '\'', count++)
     }
     // Is active filter
     if (req.body.isActive != null && typeof req.body.isActive === 'boolean') {
         logger.debug('Filtering on isActive ' + req.body.isActive)
-        users = users.filter(user => user.isActive === req.body.isActive)
+        query += whereBuilder('`isActive` = \'' + sqlBool(req.body.isActive) + '\'', count++)
     }
-    res.send({
-        code: 200,
-        message: 'Lijst van users',
-        data: users
-    })
+    // Street filter
+    if (req.body.street != null && typeof req.body.street === 'string') {
+        logger.debug('Filtering on street ' + req.body.street)
+        query += whereBuilder('`street` = \'' + req.body.street + '\'', count++)
+    }
+    // City filter
+    if (req.body.city != null && typeof req.body.city === 'string') {
+        logger.debug('Filtering on email address ' + req.body.city)
+        query += whereBuilder('`city` = \'' + req.body.city + '\'', count++)
+    }
+    return query
+}
+const getUsers = (req, res, next) => {
+    logger.debug('GET /api/user aangeroepen')
+    const query = userQuery(req)
+    logger.debug('Query: ' + query)
+    database.getConnection((err, conn) => {
+        if (err) {
+            logger.error(err.code, err.syscall, err.address, err.port)
+            next({
+                code: 500,
+                message: err.code
+            })
+        }
+        if (conn) {
+            conn.query(query, (err, results, fields) => {
+                if (err) {
+                    logger.error(err.message);
+                    next({
+                        code: 500,
+                        message: err.message
+                    })
+                }
+                if (results) {
+                    logger.info('Found', results.length, 'results')
+                    res.send({
+                        code: 200,
+                        message: 'Lijst van users',
+                        data: results
+                    })
+                }
+            })
+            database.releaseConnection(conn)
+        }
+    });
+
 }
 
 //203
@@ -137,12 +181,12 @@ const getUser = (req, res, next) => {
         })
         return
     }
-    for (let i = 0; i < database.users.length; i++) {
-        if (userId === database.users[i].id) {
+    for (let i = 0; i < inmemorydb.users.length; i++) {
+        if (userId === inmemorydb.users[i].id) {
             res.send({
                 code: 200,
                 message: 'User gevonden',
-                data: database.users[i]
+                data: inmemorydb.users[i]
             })
             return
         }
@@ -171,12 +215,12 @@ const putUser = (req, res, next) => {
         assert(userId >= 0, 'Het id moet minimaal \'0\' zijn')
         assert(typeof user.emailAdress === 'string', 'Het e-mailadres moet een string zijn')
         assert(user.emailAdress.length !== 0, 'Het e-mailadres moet minimaal een karakter lang zijn')
-        assert(user.firstName == null   || typeof user.firstName === 'string', 'De voornaam moet een string zijn')
-        assert(user.firstName == null   || user.firstName.length !== 0, 'De voornaam moet minimaal een karakter lang zijn')
-        assert(user.lastName == null    || typeof user.lastName === 'string', 'De achternaam moet een string zijn')
-        assert(user.lastName == null    || user.lastName.length !== 0, 'De achternaam moet minimaal een karakter lang zijn')
-        assert(user.password == null    || typeof user.password === 'string', 'Het wachtwoord moet een string zijn')
-        assert(user.password == null    || user.password.length !== 0, 'Het wachtwoord moet minimaal een karakter lang zijn')
+        assert(user.firstName == null || typeof user.firstName === 'string', 'De voornaam moet een string zijn')
+        assert(user.firstName == null || user.firstName.length !== 0, 'De voornaam moet minimaal een karakter lang zijn')
+        assert(user.lastName == null || typeof user.lastName === 'string', 'De achternaam moet een string zijn')
+        assert(user.lastName == null || user.lastName.length !== 0, 'De achternaam moet minimaal een karakter lang zijn')
+        assert(user.password == null || typeof user.password === 'string', 'Het wachtwoord moet een string zijn')
+        assert(user.password == null || user.password.length !== 0, 'Het wachtwoord moet minimaal een karakter lang zijn')
         assert(user.phoneNumber == null || typeof user.phoneNumber === 'string', 'Het telefoonnummer moet een string zijn')
         assert(user.phoneNumber == null || user.phoneNumber.length === 10, 'Het telefoonnummer moet tien karakers lang zijn')
     } catch (err) {
@@ -186,26 +230,26 @@ const putUser = (req, res, next) => {
         })
         return
     }
-    for (let i = 0; i < database.users.length; i++) {
-        if (userId === database.users[i].id) {
-            database.users[i].emailAdress = user.emailAdress
+    for (let i = 0; i < inmemorydb.users.length; i++) {
+        if (userId === inmemorydb.users[i].id) {
+            inmemorydb.users[i].emailAdress = user.emailAdress
             if (req.body.firstName != null) {
-                database.users[i].firstName = user.firstName
+                inmemorydb.users[i].firstName = user.firstName
             }
             if (req.body.lastName != null) {
-                database.users[i].lastName = user.lastName
+                inmemorydb.users[i].lastName = user.lastName
             }
             if (req.body.password != null) {
-                database.users[i].password = user.password
+                inmemorydb.users[i].password = user.password
             }
             if (req.body.phoneNumber != null) {
-                database.users[i].phoneNumber = user.phoneNumber
+                inmemorydb.users[i].phoneNumber = user.phoneNumber
             }
             logger.info('User ' + userId + ' is aangepast')
             res.send({
                 code: 200,
                 message: 'User bijgewerkt',
-                data: database.users[i]
+                data: inmemorydb.users[i]
             })
             return
         }
@@ -239,14 +283,14 @@ const deleteUser = (req, res, next) => {
         return
     }
     let deletePosition = null
-    for (let i = 0; i < database.users.length; i++) {
-        if (userId === database.users[i].id) {
+    for (let i = 0; i < inmemorydb.users.length; i++) {
+        if (userId === inmemorydb.users[i].id) {
             deletePosition = i
             break
         }
     }
     if (deletePosition != null) {
-        database.users.splice(deletePosition, 1)
+        inmemorydb.users.splice(deletePosition, 1)
         logger.info('User ' + userId + ' is verwijderd')
         res.send({
             code: 200,
@@ -262,4 +306,4 @@ const deleteUser = (req, res, next) => {
     })
 }
 
-module.exports = {postUser, getUsers, getProfile, getUser, putUser, deleteUser}
+module.exports = { postUser, getUsers, getProfile, getUser, putUser, deleteUser }
