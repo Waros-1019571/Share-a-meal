@@ -5,11 +5,11 @@ const inmemorydb = require('../util/in-memory-database')
 const database = require('../util/mysql')
 const whereBuilder = require('../util/where-builder')
 const sqlBool = require('../util/sql-bool')
-let index = inmemorydb.users.length
 
 //201
 const postUser = (req, res, next) => {
     logger.debug('POST /api/user aangeroepen met body: ' + JSON.stringify(req.body))
+    // Section - validate info
     const user = req.body
     try {
         assert(typeof user.emailAdress === 'string', 'Het e-mailadres moet een string zijn')
@@ -23,40 +23,84 @@ const postUser = (req, res, next) => {
         assert(user.password.length > 0, 'Het wachtwoord moet minimaal een karakter lang zijn')
         assert(typeof user.phoneNumber === 'string', 'Het telefoonnummer moet een string zijn')
         assert(user.phoneNumber.length === 10, 'Het telefoonnummer moet tien karakers lang zijn')
-        for (let i = 0; i < inmemorydb.users.length; i++) {
-            assert(user.emailAdress !== inmemorydb.users[i].emailAdress, 'Het e-mailadres is al in gebruik!')
-        }
+        assert(typeof user.street === 'string', 'De straat moet een string zijn')
+        assert(user.street.length > 0, 'De straat moet minimaal een karakter lang zijn')
+        assert(typeof user.city === 'string', 'De stad moet een string zijn')
+        assert(user.city.length > 0, 'De stad moet minimaal een karakter lang zijn')
     } catch (err) {
-        if (err.message === 'Het e-mailadres is al in gebruik!') {
-            next({
-                code: 403,
-                message: err.message
-            })
-        } else {
-            next({
-                code: 400,
-                message: err.message
-            })
-        }
+        next({
+            code: 400,
+            message: err.message
+        })
         return
     }
-    user.id = index++
-    user.isActive = true
-    inmemorydb.users.push({
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        emailAdress: user.emailAdress,
-        password: user.password,
-        phoneNumber: user.phoneNumber,
-        isActive: user.isActive
-    })
-    logger.info('User ' + user.id + ' toegevoegd')
-    res.status(201).send({
-        code: 201,
-        message: 'User toegevoegd',
-        data: user
-    })
+    database.getConnection((err, conn) => {
+        if (err) {
+            logger.error(err.code, err.syscall, err.address, err.port)
+            next({
+                code: 500,
+                message: err.code
+            })
+            database.releaseConnection(conn)
+        }
+        if (conn) {
+            // Section - email exists check
+            const emailExistsQuery = 'SELECT COUNT(*) AS `count` FROM `user` WHERE `emailAdress` = ?'
+            conn.query(emailExistsQuery, [user.emailAdress], (err, results, fields) => {
+                if (err || results[0].count == null) {
+                    next({
+                        code: 500,
+                        message: err
+                    })
+                    database.releaseConnection(conn)
+                    return
+                }
+                if (results[0].count !== 0) {
+                    next({
+                        code: 403,
+                        message: 'Het e-mailadres is al in gebruik!'
+                    })
+                    database.releaseConnection(conn)
+                    return
+                }
+                // Section - insert into
+                const insertIntoQuery = 'INSERT INTO `user` (`firstName`, `lastName`, `emailAdress`, `password`, `street`, `city`, `phoneNumber`, `isActive` ) VALUES' +
+                    '(?, ?, ?, ?, ?, ?, ?, 1)'
+                conn.query(insertIntoQuery, [user.firstName, user.lastName, user.emailAdress, user.password, user.street, user.city, user.phoneNumber], (err, results, fields) => {
+                    console.log(results.insertId)
+                    if (err || !results) {
+                        logger.error(err.message);
+                        next({
+                            code: 500,
+                            message: err.message
+                        })
+                        database.releaseConnection(conn)
+                        return
+                    }
+                    logger.info('User ' + results.insertId + ' toegevoegd')
+                    // Section - get new user
+                    const getByIdQuery = 'SELECT * FROM `user` WHERE id = ?'
+                    conn.query(getByIdQuery, [results.insertId], (err, results, fields) => {
+                        if (err || !results) {
+                            logger.error(err.message);
+                            next({
+                                code: 500,
+                                message: err.message
+                            })
+                            database.releaseConnection(conn)
+                            return
+                        }
+                        res.status(201).send({
+                            code: 201,
+                            message: 'User toegevoegd',
+                            data: results[0]
+                        })
+                        database.releaseConnection(conn)
+                    })
+                })
+            })
+        }
+    });
 }
 
 //202
@@ -141,7 +185,6 @@ const getUsers = (req, res, next) => {
             database.releaseConnection(conn)
         }
     });
-
 }
 
 //203
