@@ -13,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{ \r\n    \"firstName\": \"Jon\",\r\n    \"lastName\": \"Snow\",\r\n    \"emailAdress\": \"jon@snow.nl\",\r\n    \"password\": \"YouKnowNothingJonSnow\"\r\n}",
+					"raw": "{ \r\n    \"firstName\": \"Jon\",\r\n    \"lastName\": \"Snow\",\r\n    \"emailAdress\": \"jon@snow.nl\",\r\n    \"password\": \"YouKnowNothingJonSnow\",\r\n    \"phoneNumber\": \"069876543\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -44,7 +44,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 0,\r\n    \"firstName\": \"Hendrik\",\r\n    \"lastName\": \"van Dam\",\r\n    \"emailAdress\": \"hvd@server.nl\",\r\n    \"password\": \"PythonisbeterdanJava\",\r\n    \"isActive\": false\r\n}",
+					"raw": "{\r\n    \"id\": 3,\r\n    \"firstName\": \"Herman\",\r\n    \"lastName\": \"Huizinga\",\r\n    \"emailAdress\": \"h.huizinga@server.nl\",\r\n    \"phoneNumber\": \"06-12345678\",\r\n    \"isActive\": true,\r\n    \"street\": \"\",\r\n    \"city\": \"\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -136,7 +136,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{ \r\n    \"firstName\": \"Arya\",\r\n    \"lastName\": \"Stark\",\r\n    \"emailAdress\": \"pk@21.it\",\r\n    \"password\": \"PythonisbeterdanJava\"\r\n}",
+					"raw": "{ \r\n    \"token\": \"\",\r\n    \"firstName\": \"Arya\",\r\n    \"lastName\": \"Stark\",\r\n    \"emailAdress\": \"pk@21.it\",\r\n    \"password\": \"PythonisbeterdanJava\",\r\n    \"phoneNumber\": \"069876543\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -163,6 +163,15 @@
 			"request": {
 				"method": "DELETE",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"token\": \"\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
 					"raw": "localhost:1337/api/user/1",
 					"host": [
